@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000010" />
+  <meta name="description" content="Floating Life OS — Futuristic Habit Tracker & Performance System" />
+  <title>FLOATING LIFE OS</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ==================== CANVAS BACKGROUND ==================== -->
+<canvas id="bgCanvas"></canvas>
+
+<!-- ==================== LOADING SCREEN ==================== -->
+<div id="loadingScreen">
+  <div class="loader-content">
+    <div class="loader-logo">FLOATING LIFE OS</div>
+    <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+    <div class="loader-text" id="loaderText">INITIALIZING SYSTEMS...</div>
+  </div>
+</div>
+
+<!-- ==================== HUD OVERLAY ==================== -->
+<div id="hud">
+
+  <!-- TOP BAR -->
+  <div class="hud-top">
+    <div class="logo-mark">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">LIFE<span class="accent">OS</span></span>
+    </div>
+    <div class="hud-center-info">
+      <div class="date-display" id="dateDisplay"></div>
+      <div class="time-display" id="timeDisplay"></div>
+    </div>
+    <div class="hud-top-right">
+      <div class="xp-pill">
+        <span class="xp-label">LVL</span>
+        <span class="xp-value" id="userLevel">1</span>
+        <div class="xp-bar-mini"><div class="xp-bar-fill" id="xpBarMini"></div></div>
+        <span class="xp-pts" id="xpPoints">0 XP</span>
+      </div>
+      <button class="icon-btn" id="soundToggle" title="Toggle Sound">♪</button>
+      <button class="icon-btn" id="themeToggle" title="Toggle Theme">◈</button>
+    </div>
+  </div>
+
+  <!-- SIDE NAVIGATION -->
+  <nav class="side-nav" id="sideNav">
+    <button class="nav-btn active" data-panel="dashboard" title="Dashboard">
+      <span class="nav-icon">◎</span>
+      <span class="nav-label">DASH</span>
+    </button>
+    <button class="nav-btn" data-panel="habits" title="Habits">
+      <span class="nav-icon">◈</span>
+      <span class="nav-label">HABITS</span>
+    </button>
+    <button class="nav-btn" data-panel="analytics" title="Analytics">
+      <span class="nav-icon">◬</span>
+      <span class="nav-label">STATS</span>
+    </button>
+    <button class="nav-btn" data-panel="evolution" title="Evolution">
+      <span class="nav-icon">⟁</span>
+      <span class="nav-label">EVOLVE</span>
+    </button>
+    <button class="nav-btn" data-panel="assistant" title="AI Assistant">
+      <span class="nav-icon">◉</span>
+      <span class="nav-label">AI</span>
+    </button>
+  </nav>
+
+  <!-- ==================== PANELS ==================== -->
+
+  <!-- DASHBOARD PANEL -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="panel-header">
+      <h2 class="panel-title">SYSTEM <span class="accent">OVERVIEW</span></h2>
+      <div class="panel-subtitle" id="greetingText">GOOD MORNING, OPERATOR</div>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- Daily Score -->
+      <div class="float-card card-score" id="dailyScoreCard">
+        <div class="card-label">DAILY SCORE</div>
+        <div class="score-ring-wrap">
+          <svg class="score-ring" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="52"/>
+            <circle class="ring-fill" id="scoreRingFill" cx="60" cy="60" r="52" stroke-dasharray="327" stroke-dashoffset="327"/>
+          </svg>
+          <div class="score-center">
+            <span class="score-num" id="dailyScore">0</span>
+            <span class="score-pct">%</span>
+          </div>
+        </div>
+        <div class="card-sub" id="scoreStatus">NO HABITS YET</div>
+      </div>
+
+      <!-- Streak -->
+      <div class="float-card card-streak">
+        <div class="card-label">CURRENT STREAK</div>
+        <div class="streak-num" id="streakNum">0</div>
+        <div class="streak-unit">DAYS</div>
+        <div class="streak-flame" id="streakFlame">—</div>
+      </div>
+
+      <!-- Today's Quick Stats -->
+      <div class="float-card card-quickstats">
+        <div class="card-label">TODAY</div>
+        <div class="quickstat-row">
+          <div class="qs-item">
+            <div class="qs-val" id="qsTotal">0</div>
+            <div class="qs-label">TOTAL</div>
+          </div>
+          <div class="qs-item">
+            <div class="qs-val accent" id="qsDone">0</div>
+            <div class="qs-label">DONE</div>
+          </div>
+          <div class="qs-item">
+            <div class="qs-val dim" id="qsMissed">0</div>
+            <div class="qs-label">MISSED</div>
+          </div>
+        </div>
+        <div class="mini-progress-wrap">
+          <div class="mini-progress-bar"><div class="mini-progress-fill" id="miniProgressFill"></div></div>
+        </div>
+      </div>
+
+      <!-- Weekly Comparison -->
+      <div class="float-card card-compare">
+        <div class="card-label">PERFORMANCE DELTA</div>
+        <div class="compare-row">
+          <div class="cmp-item">
+            <div class="cmp-label">VS YESTERDAY</div>
+            <div class="cmp-val" id="cmpYesterday">—</div>
+          </div>
+          <div class="cmp-divider"></div>
+          <div class="cmp-item">
+            <div class="cmp-label">VS WEEK AVG</div>
+            <div class="cmp-val" id="cmpWeek">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Add -->
+      <div class="float-card card-quickadd">
+        <div class="card-label">QUICK ADD HABIT</div>
+        <div class="quick-add-form">
+          <input type="text" id="quickHabitName" class="hud-input" placeholder="Habit name..." maxlength="40" />
+          <div class="quick-add-row">
+            <select id="quickHabitPriority" class="hud-select">
+              <option value="high">⬡ HIGH</option>
+              <option value="medium" selected>◈ MED</option>
+              <option value="low">○ LOW</option>
+            </select>
+            <input type="number" id="quickHabitTime" class="hud-input small" placeholder="Min" min="1" max="480" />
+            <button class="hud-btn" id="quickAddBtn">+ ADD</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Insight -->
+      <div class="float-card card-insight">
+        <div class="card-label">AI INSIGHT</div>
+        <div class="insight-text" id="dashInsight">Analyzing your patterns...</div>
+        <div class="insight-tag" id="dashInsightTag">SYSTEM</div>
+      </div>
+    </div>
+
+    <!-- TODAY'S HABITS (mini) -->
+    <div class="today-habits-section">
+      <div class="section-label">TODAY'S MISSION LOG</div>
+      <div class="habits-mini-list" id="dashHabitList">
+        <div class="empty-state">No habits yet. Add your first mission above.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HABITS PANEL -->
+  <div class="panel" id="panel-habits">
+    <div class="panel-header">
+      <h2 class="panel-title">HABIT <span class="accent">MATRIX</span></h2>
+      <div class="panel-subtitle">CONFIGURE YOUR DAILY PROTOCOLS</div>
+    </div>
+
+    <div class="habits-controls">
+      <button class="hud-btn primary" id="openAddHabitModal">⊕ NEW HABIT</button>
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all">ALL</button>
+        <button class="filter-btn" data-filter="high">HIGH</button>
+        <button class="filter-btn" data-filter="medium">MEDIUM</button>
+        <button class="filter-btn" data-filter="low">LOW</button>
+      </div>
+    </div>
+
+    <div class="habits-3d-container" id="habitsContainer">
+      <div class="empty-state-large" id="habitsEmptyState">
+        <div class="empty-icon">◎</div>
+        <div class="empty-title">NO HABITS CONFIGURED</div>
+        <div class="empty-sub">Add your first habit protocol to begin tracking</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS PANEL -->
+  <div class="panel" id="panel-analytics">
+    <div class="panel-header">
+      <h2 class="panel-title">PERFORMANCE <span class="accent">ANALYTICS</span></h2>
+      <div class="panel-subtitle">DEEP SYSTEM DIAGNOSTICS</div>
+    </div>
+
+    <div class="analytics-grid">
+      <div class="float-card analytics-card wide">
+        <div class="card-label">WEEKLY COMPLETION RATE</div>
+        <canvas id="weeklyChart" height="140"></canvas>
+      </div>
+
+      <div class="float-card analytics-card">
+        <div class="card-label">HABIT DISTRIBUTION</div>
+        <canvas id="priorityChart" height="160"></canvas>
+      </div>
+
+      <div class="float-card analytics-card">
+        <div class="card-label">7-DAY STREAK MAP</div>
+        <div class="streak-map" id="streakMap"></div>
+      </div>
+
+      <div class="float-card analytics-card wide">
+        <div class="card-label">HABIT PERFORMANCE BREAKDOWN</div>
+        <div class="habit-breakdown" id="habitBreakdown"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVOLUTION PANEL -->
+  <div class="panel" id="panel-evolution">
+    <div class="panel-header">
+      <h2 class="panel-title">EVOLUTION <span class="accent">ENGINE</span></h2>
+      <div class="panel-subtitle">PATTERN RECOGNITION & GROWTH ANALYSIS</div>
+    </div>
+
+    <div class="evolution-grid">
+      <div class="float-card evo-profile">
+        <div class="card-label">OPERATOR PROFILE</div>
+        <div class="evo-avatar">
+          <div class="avatar-ring"></div>
+          <div class="avatar-core" id="avatarCore">⬡</div>
+          <div class="avatar-level" id="avatarLevel">LVL 1</div>
+        </div>
+        <div class="evo-title" id="evoTitle">INITIATE</div>
+        <div class="evo-xp-bar">
+          <div class="evo-xp-fill" id="evoXpFill"></div>
+        </div>
+        <div class="evo-xp-label" id="evoXpLabel">0 / 100 XP</div>
+      </div>
+
+      <div class="float-card evo-insights">
+        <div class="card-label">PATTERN INSIGHTS</div>
+        <div class="insights-list" id="insightsList">
+          <div class="insight-item loading">Analyzing behavioral patterns...</div>
+        </div>
+      </div>
+
+      <div class="float-card evo-badges">
+        <div class="card-label">ACHIEVEMENTS</div>
+        <div class="badges-grid" id="badgesGrid"></div>
+      </div>
+
+      <div class="float-card evo-forecast">
+        <div class="card-label">TRAJECTORY FORECAST</div>
+        <canvas id="forecastChart" height="150"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI ASSISTANT PANEL -->
+  <div class="panel" id="panel-assistant">
+    <div class="panel-header">
+      <h2 class="panel-title">AI <span class="accent">ADVISOR</span></h2>
+      <div class="panel-subtitle">POWERED BY ANTHROPIC CLAUDE</div>
+    </div>
+
+    <div class="assistant-layout">
+      <div class="assistant-orb-wrap">
+        <div class="ai-orb" id="aiOrb">
+          <div class="orb-ring r1"></div>
+          <div class="orb-ring r2"></div>
+          <div class="orb-ring r3"></div>
+          <div class="orb-core">◉</div>
+        </div>
+        <div class="ai-status" id="aiStatus">READY</div>
+      </div>
+
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg ai">
+            <div class="msg-icon">◉</div>
+            <div class="msg-bubble">
+              <div class="msg-name">LIFE OS ADVISOR</div>
+              <div class="msg-text">Greetings, Operator. I am your AI performance advisor. I have access to your habit data and can provide real-time analysis, motivation, and strategic guidance. How can I optimize your performance today?</div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-wrap">
+          <div class="quick-prompts" id="quickPrompts">
+            <button class="qp-btn" data-prompt="Analyze my habit performance and give me insights">Analyze Performance</button>
+            <button class="qp-btn" data-prompt="What habits should I focus on improving?">Suggest Improvements</button>
+            <button class="qp-btn" data-prompt="Motivate me to complete my habits today">Motivate Me</button>
+            <button class="qp-btn" data-prompt="What is my biggest weakness in my routine?">Find Weaknesses</button>
+          </div>
+          <div class="chat-input-row">
+            <textarea id="chatInput" class="chat-textarea" placeholder="Ask your AI advisor..." rows="1"></textarea>
+            <button class="send-btn" id="sendBtn">▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end #hud -->
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Add Habit Modal -->
+<div class="modal-overlay" id="addHabitModal">
+  <div class="modal float-card">
+    <div class="modal-header">
+      <div class="modal-title">⊕ NEW HABIT PROTOCOL</div>
+      <button class="modal-close" id="closeHabitModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">HABIT NAME</label>
+        <input type="text" id="habitName" class="hud-input full" placeholder="e.g. Morning Meditation" maxlength="50" />
+      </div>
+      <div class="form-row">
+        <div class="form-group half">
+          <label class="form-label">PRIORITY</label>
+          <select id="habitPriority" class="hud-select full">
+            <option value="high">⬡ HIGH PRIORITY</option>
+            <option value="medium" selected>◈ MEDIUM PRIORITY</option>
+            <option value="low">○ LOW PRIORITY</option>
+          </select>
+        </div>
+        <div class="form-group half">
+          <label class="form-label">TIME TARGET (MIN)</label>
+          <input type="number" id="habitTime" class="hud-input full" placeholder="30" min="1" max="480" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">CATEGORY</label>
+        <div class="category-chips" id="categoryChips">
+          <button class="chip active" data-cat="health">🧬 HEALTH</button>
+          <button class="chip" data-cat="mind">🧠 MIND</button>
+          <button class="chip" data-cat="work">⚡ WORK</button>
+          <button class="chip" data-cat="fitness">💪 FITNESS</button>
+          <button class="chip" data-cat="social">🌐 SOCIAL</button>
+          <button class="chip" data-cat="creative">✦ CREATIVE</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">NOTES (OPTIONAL)</label>
+        <textarea id="habitNotes" class="hud-input full" placeholder="Any additional notes..." rows="2" maxlength="200"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="hud-btn" id="cancelHabitBtn">CANCEL</button>
+      <button class="hud-btn primary" id="saveHabitBtn">DEPLOY HABIT</button>
+    </div>
+  </div>
+</div>
+
+<!-- Completion Modal -->
+<div class="modal-overlay" id="completionModal">
+  <div class="modal float-card completion-modal">
+    <div class="completion-burst" id="completionBurst"></div>
+    <div class="completion-icon">✓</div>
+    <div class="completion-title">MISSION COMPLETE</div>
+    <div class="completion-habit" id="completionHabitName"></div>
+    <div class="completion-xp" id="completionXP">+10 XP</div>
+    <button class="hud-btn primary" id="closeCompletionModal">CONTINUE</button>
+  </div>
+</div>
+
+<!-- ==================== NOTIFICATION TOAST ==================== -->
+<div class="toast" id="toast"></div>
+
+<!-- ==================== AUDIO ==================== -->
+<audio id="sfxComplete" src="" preload="none"></audio>
+<audio id="sfxAdd" src="" preload="none"></audio>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
